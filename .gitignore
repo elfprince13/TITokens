@@ -13,4 +13,6 @@ test.txt
 
 *.bin
 
+*.pyc
+
 purebasic

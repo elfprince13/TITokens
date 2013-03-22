@@ -1,54 +1,147 @@
 #!/usr/bin/env python  
 import xml.etree.ElementTree as ET  
-import sys   
+import sys
+
+import re
+nanum = re.compile(r'[^\w@#$&|\\;]',flags=re.UNICODE)
 
 def get_byte(attrib):
 	return int(attrib['byte'][1:],16)
 
-def concatenate_bytes(*tokbytes):
+def concatenate_bytes(tokbytes):
 	ret = 0
 	mpow = len(tokbytes)-1
 	for i,byte in enumerate(tokbytes):
 		ret += byte * 256**(mpow-i)
 	return ret
 
-def emit_token(string,*tokbytes):
-	if string == r'\n':
+def cleanup_chars(string):
+	trouble = dict(	(i,repr(c.encode('utf-8'))[1:-1])	for i,c in enumerate(string) if ord(c) >= 128 or c == "\\")
+	if trouble:
+		string = "".join([c if i not in trouble else trouble[i] for i,c in enumerate(string)])
+	return string
+
+def emit_token(string,tokbytes,raw_mode=False,rootattrs=None):
+	if string == r'\n' and not raw_mode:
 		string = r'\n|\r\n?'
 		tlen=1.5
 		quotes = False
-	elif string == "":
+	elif string == "" and not raw_mode:
 		string = "<<EOF>>"
 		quotes = False
 		tlen = 0
 	else:
 		quotes = True
 		tlen = len(string)
-		trouble = dict(	(i,repr(c.encode('utf-8'))[1:-1])	for i,c in enumerate(string) if ord(c) >= 128 or c == "\\")
-		if trouble:
-			#print trouble
-			string = "".join([c if i not in trouble else trouble[i] for i,c in enumerate(string)])
+		string = cleanup_chars(string)
 	string = "".join([i for i in ['"',string.replace('"',r'\"'),'"'] if quotes or i!='"'])
+	return (tlen,string,tokbytes,rootattrs) if raw_mode else ((tlen,'%s\t{\treturn 0x%X;\t}' % (string, concatenate_bytes(tokbytes))))
 		
-	return (tlen,'%s\t{\treturn 0x%X;\t}' % (string, concatenate_bytes(*tokbytes)))
-		
-def add_all_tokens(down_from,tokens,byte_prefix):
+def add_all_tokens(down_from,tokens,byte_prefix,raw_mode=False):
 	for token in down_from.findall("{http://merthsoft.com/Tokens}Token"):
 		bp=byte_prefix+[get_byte(token.attrib)]
 		if 'string' in token.attrib:
-			tokens.append(emit_token(token.attrib['string'],*bp))
+			tokens.append(emit_token(token.attrib['string'],bp,raw_mode=raw_mode,rootattrs=token.attrib))
 		for alt in token.findall("{http://merthsoft.com/Tokens}Alt"):
-			tokens.append(emit_token(alt.attrib['string'],*bp))
-		tokens = add_all_tokens(token,tokens,bp)
+			tokens.append(emit_token(alt.attrib['string'],bp,raw_mode=raw_mode,rootattrs=token.attrib))
+		tokens = add_all_tokens(token,tokens,bp,raw_mode=raw_mode)
 	return tokens
-	
+
+def getET(filename):	
+	ET.register_namespace("","http://merthsoft.com/Tokens")  
+	return ET.parse(filename).getroot()
+
+def classify(tokens):
+	types = {'op':[],'num':[],'name':[],'control':[],'statement':[],'sigil':[],'groupers':['(',')','"','{','}','[',']'],'separators':[' ',',',':','\n'],'other':[]}
+	namers = range(0x41,0x5F)+range(0x60,0x64)+[0x73,0xAA] #A-Theta, assorted variable types, Ans and Strings
+	numbers = range(0x30,0x3C) # 0-9,.,E
+	sigils = (0x5F, 0xEB) # ('|L','prgm')
+	control = range(0xCE,0xDC)
+	for olen,string,tokbytes,rootattrs in tokens:
+		fb = tokbytes[0]
+		nb = len(tokbytes)
+		aps = string[1:-1]
+		if not aps:
+			continue
+		us = aps.decode('string-escape').decode('utf-8')
+		fc = us[0]
+		lc = us[-1]
+		if fb in sigils:
+			types['sigil'].append(aps)
+		elif fb in namers:
+			types['name'].append(aps)
+		elif fb in numbers:
+			types['num'].append(aps)
+		elif aps in types['groupers']+types['separators']:
+			pass
+		elif fb in control:
+			types['control'].append(aps)
+		elif fc != " " and olen > 1:
+			types['statement'].append(aps)
+		elif nanum.findall(fc) or fc == lc == " ":
+			types['op'].append(aps)
+		else:
+			types['other'].append(aps)
+	return types
+
+def dumpLL(LL):
+	for kind,tokens in LL.iteritems():
+		print kind
+		for token in tokens:
+			print "\t",token.decode('string-escape').decode('utf-8')
+
+def make_LudditeLexer(fname):
+	root = getET(fname)
+	tokens = add_all_tokens(root,[],[],raw_mode=True)
+	tokentypes = classify(tokens)
+	template = r"""# UDL for TIBasic
+
+language TIBasic
+
+family markup
+sublanguage BasicML
+initial IN_M_DEFAULT
+# Null-transition to get into SSL state
+state IN_M_DEFAULT:
+/./ : redo, => IN_SSL_DEFAULT
+
+
+
+family ssl
+sublanguage TIBasic
+
+start_style SSL_DEFAULT
+end_style SSL_VARIABLE
+
+#...
+
+keywords = [%s]
+
+keyword_style SSL_IDENTIFIER => SSL_WORD
+
+'//' : paint(upto, SSL_COMMENT), => IN_SSL_COMMENT_LINE_1
+'"' : paint(upto, SSL_DEFAULT), => IN_SSL_DSTRING
+
+state IN_SSL_COMMENT_LINE_1:
+/[\r\n]/ : paint(upto, SSL_COMMENT), => IN_SSL_DEFAULT
+
+state IN_SSL_DSTRING:
+'"' : paint(include, SSL_STRING), => IN_SSL_DEFAULT
+/$/ : paint(upto, SSL_STRING), => IN_SSL_DEFAULT
+'\r' : paint(upto, SSL_STRING), => IN_SSL_DEFAULT
+
+token_check:
+# All other keywords prefer an RE
+
+SSL_DEFAULT: skip all
+SSL_COMMENT: skip all
+
+"""
+	return template % (" ".join("'%s'" % (s.rstrip("(")) for s in tokentypes['control']))
+
 
 if __name__ == '__main__':
-	ET.register_namespace("","http://merthsoft.com/Tokens")  
-	
-	tree = ET.parse(sys.argv[1])  
-	  
-	root = tree.getroot()
+	root = getET(sys.argv[1])
 	print "%{"
 	print "#define YY_DECL unsigned long tok_yylex(void)"
 	print "#define MAX_TOKEN_BYTES sizeof(long)"
