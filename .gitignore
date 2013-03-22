@@ -1,4 +1,16 @@
 
+.DS_Store
+
 TIFC.txt
 
 test.txt
+
+*.yy.c
+
+*.l
+
+*.8xp
+
+*.bin
+
+purebasic

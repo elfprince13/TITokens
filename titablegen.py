@@ -14,7 +14,7 @@ def concatenate_bytes(*tokbytes):
 
 def emit_token(string,*tokbytes):
 	if string == r'\n':
-		string = r'(\n|\r\n?)(\/\/[^\r\n]+(\n|\r\n?))?'
+		string = r'\n|\r\n?'
 		tlen=1.5
 		quotes = False
 	elif string == "":
@@ -58,7 +58,7 @@ if __name__ == '__main__':
 	print "%option noyywrap"
 	print "%option yylineno"
 	print "%%"
-	tokens = add_all_tokens(root,[(0,'.\tfprintf(stderr,"Skipping Unknown Character\\n");')],[])
+	tokens = add_all_tokens(root,[(0,'.\tfprintf(stderr,"Skipping Unknown Character\\n");'),(512,r'^\/\/[^\r\n]+(\n|\r\n?) /* Eat comment */;')],[])
 	#print ("" if 'string' not in token.attrib else token.attrib['string']),hex(int(token.attrib['byte'][1:],16))
 	#print "-----"
 	for tlen,pattern in sorted(tokens,reverse=True):

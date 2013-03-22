@@ -1,0 +1,16 @@
+//---------------------------------------------------------------------------------------------
+// TI-BASIC (DoorsCS 7)
+// Copyright (C) <Your Name Here>
+//---------------------------------------------------------------------------------------------
+:"Description here"
+:DCS6
+"FFFF80018001800180018001800180018001800180018001800180018001FFFF"
+:A
+// List sub-program names here
+// if no sub-programs, delete the line above and below this comment
+// e.g.
+// ZSUB1
+// ZSUB2
+// ...
+// ZSUBN
+:
