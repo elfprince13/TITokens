@@ -17,6 +17,8 @@ test.txt
 
 *.bin
 
+*.xpi
+
 *.pyc
 
 purebasic
