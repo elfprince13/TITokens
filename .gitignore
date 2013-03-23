@@ -1,4 +1,8 @@
 
+Komodo/build
+
+*.bak
+
 .DS_Store
 
 TIFC.txt

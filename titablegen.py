@@ -99,7 +99,6 @@ def make_LudditeLexer(fname):
 language TIBasic
 
 family markup
-sublanguage BasicML
 initial IN_M_DEFAULT
 # Null-transition to get into SSL state
 state IN_M_DEFAULT:
@@ -115,9 +114,13 @@ end_style SSL_VARIABLE
 
 #...
 
-keywords = [%s]
+keywords [%s]
 
 keyword_style SSL_IDENTIFIER => SSL_WORD
+
+initial IN_SSL_DEFAULT
+
+state IN_SSL_DEFAULT:
 
 '//' : paint(upto, SSL_COMMENT), => IN_SSL_COMMENT_LINE_1
 '"' : paint(upto, SSL_DEFAULT), => IN_SSL_DSTRING
