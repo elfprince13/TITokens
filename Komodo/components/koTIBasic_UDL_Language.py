@@ -27,7 +27,7 @@ def registerLanguage(registry):
     registry.registerLanguage(KoTIBasicLanguage())
 
 
-class KoTIBasicLanguage(KoUDLLanguage):#, KoLanguageBaseDedentMixin):
+class KoTIBasicLanguage(KoUDLLanguage, KoLanguageBaseDedentMixin):
     name = "TIBasic"
     _reg_desc_ = "%s Language" % name
     _reg_contractid_ = "@activestate.com/koLanguage?language=%s;1" % name
@@ -52,16 +52,16 @@ A+B->C
 Pause C
 ClrHome"""
 
-    #def __init__(self):
-    #    KoUDLLanguage.__init__(self)
-    #    KoLanguageBaseDedentMixin.__init__(self)
-    #    
-    #    self.matchingSoftChars = {"(": (")", None),
-    #                              "{": ("}", None),
-    #                              "[": ("]", None),
-    #                              '"': ('"', self.softchar_accept_matching_double_quote)
-    #                              }            
-    #    
-    #    self._setupIndentCheckSoftChar()
+    def __init__(self):
+        KoUDLLanguage.__init__(self)
+        KoLanguageBaseDedentMixin.__init__(self)
+        
+        self.matchingSoftChars = {"(": (")", None),
+                                  "{": ("}", None),
+                                  "[": ("]", None),
+                                  '"': ('"', self.softchar_accept_matching_double_quote)
+                                  }            
+        
+        self._setupIndentCheckSoftChar()
 
 

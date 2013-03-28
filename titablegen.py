@@ -4,6 +4,7 @@ import sys
 
 import re
 nanum = re.compile(r'[^\w@#$&|\\;]',flags=re.UNICODE)
+specchars = re.compile(r'([\\\/\[\]\.\{\}\(\)\^\|\+\*\?\$])')
 
 def get_byte(attrib):
 	return int(attrib['byte'][1:],16)
@@ -14,6 +15,9 @@ def concatenate_bytes(tokbytes):
 	for i,byte in enumerate(tokbytes):
 		ret += byte * 256**(mpow-i)
 	return ret
+
+def regesc(string):
+	return specchars.sub(lambda s:r"\%s"%(s.group(0)),string)
 
 def cleanup_chars(string):
 	trouble = dict(	(i,repr(c.encode('utf-8'))[1:-1])	for i,c in enumerate(string) if ord(c) >= 128 or c == "\\")
@@ -94,6 +98,7 @@ def make_LudditeLexer(fname):
 	root = getET(fname)
 	tokens = add_all_tokens(root,[],[],raw_mode=True)
 	tokentypes = classify(tokens)
+	dumpLL(tokentypes)
 	template = r"""# UDL for TIBasic
 
 language TIBasic
@@ -122,25 +127,25 @@ initial IN_SSL_DEFAULT
 
 state IN_SSL_DEFAULT:
 
-'//' : paint(upto, SSL_COMMENT), => IN_SSL_COMMENT_LINE_1
-'"' : paint(upto, SSL_DEFAULT), => IN_SSL_DSTRING
+/^\/\// : paint(upto, SSL_COMMENT), => IN_SSL_COMMENT_LINE_1
+/"/ : paint(upto, SSL_DEFAULT), => IN_SSL_DSTRING
+/%s/ : paint(upto, SSL_DEFAULT), paint(include, SSL_IDENTIFIER)
+/%s/ : paint(upto, SSL_DEFAULT), paint(include, SSL_VARIABLE)
+/./ : paint(include, SSL_DEFAULT)
 
 state IN_SSL_COMMENT_LINE_1:
-/[\r\n]/ : paint(upto, SSL_COMMENT), => IN_SSL_DEFAULT
+/[\r\n]/ : paint(upto, SSL_COMMENT), redo, => IN_SSL_DEFAULT
 
 state IN_SSL_DSTRING:
-'"' : paint(include, SSL_STRING), => IN_SSL_DEFAULT
-/$/ : paint(upto, SSL_STRING), => IN_SSL_DEFAULT
-'\r' : paint(upto, SSL_STRING), => IN_SSL_DEFAULT
-
-token_check:
-# All other keywords prefer an RE
-
-SSL_DEFAULT: skip all
-SSL_COMMENT: skip all
-
+/"/ : paint(include, SSL_STRING), => IN_SSL_DEFAULT
+/[\r\n]/ : paint(upto, SSL_STRING), redo, => IN_SSL_DEFAULT
 """
-	return template % (" ".join("'%s'" % (s.rstrip("(")) for s in tokentypes['control']))
+	return template % (" ".join("'%s'" % (s#.rstrip("(")
+										  ) for s in tokentypes['control']),
+						"|".join(sorted(["(%s)" % (regesc(s)#.rstrip("(")
+											 ) for s in tokentypes['control']+tokentypes['statement']],reverse=True)),
+						"|".join(sorted(["(%s)" % (regesc(s)#.rstrip("(")
+											 ) for s in tokentypes['name']],reverse=True)))
 
 
 if __name__ == '__main__':
