@@ -5,11 +5,7 @@ Komodo/build
 
 .DS_Store
 
-TIFC.txt
-
-test.txt
-
-*.yy.c
+*.tib
 
 *.l
 

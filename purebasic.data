@@ -1,0 +1,437 @@
+ClrDraw
+AxesOff
+91->W:26->B:9->C
+While iPart(W)=91
+If fPart(W)=0:1->W
+If fPart(W)=.1:3->W
+20->A:1->U
+While W=1
+Text(1,2,"TI-FREAKWARE'S CONVERTER
+Text(20,30,"CONVERT
+Text(26,36,"EXIT
+getKey->K
+Text(A,B,">
+If K:Text(A,B,"    "
+B-6((A>20 and K=25)-(A<26 and K=34->B
+A-6((K=25 and A>20)-(K=34 and A<26->A
+If K=21:Then
+If A=26:Then
+DelVar WDelVar KDelVar ADelVar BDelVar CDelVar UDelVar L1DelVar L2DelVar Str1DelVar L:ClrDraw:Return
+End
+If A=20:2->W
+End
+End
+While W=2
+Text(35,10,"SET DECIMAL ACCURACY
+Text(56,8,"2ND TO CONT., MODE TO EXIT
+getKey->K
+Text(45,40,"<",C,">
+C-(K=24 and C>0)+(C<9 and K=26->C
+If K=22:Then
+91->W:ClrDraw
+End
+If K=21:3->W
+End
+If W=3:Then
+ClrHome
+Disp "PLEASE ENTER","KNOWN VALUE
+Input "",E
+ClrHome:ClrDraw:42->W
+While W=42
+Text(1,15,"CHOOSE CONVERSION
+Text(56,75,"NEXT|>
+If U=1:Then
+Text(7,5,"LENGTH/DISTANCE
+Text(13,5,"AREA
+Text(19,5,"VOLUME
+Text(25,5,"WEIGHT/MASS
+Text(31,5,"ENERGY/WORK
+Text(37,5,"SPEED/VELOCITY
+Text(43,5,"PRESSURE
+Text(49,5,"TEMPERATURE
+Text(55,5,"TIME
+End
+If U=2:Then
+Text(7,5,"TORQUE
+End
+4->W:7->A
+While W=4
+Text(A,1,">
+getKey->K
+If K:Text(A,1,"   
+A-6((A>7 and K=25)-(K=34 and ((U=1 and A<55) or (U=2 and A<7->A
+If K=15:Then
+U+(U=1)-(U=2->U:ClrDraw:42->W:End
+If K=22:Then:ClrDraw:91->W:End
+If K=21:Then
+If U=1:Then
+If A=7:10->W
+If A=13:20->W
+If A=19:30->W
+If A=25:40->W
+If A=31:50->W
+If A=37:60->W
+If A=43:70->W
+If A=49:80->W
+If A=55:90->W
+End
+If U=2:Then:If A=7:76->W:End
+End:End:End:End
+7->A:1->U
+ClrDraw
+If W=76:Then
+Text(1,35,"TORQUE
+Text(7,5,"NM|>
+Text(13,5,"LB FT|>
+Text(19,5,"LB IN|>
+Text(25,5,"OZ IN|>
+While W=76
+Text(A,1,">
+getKey->K
+If K:Text(A,1,"   
+A-6((K=25 and A>7)-(K=34 and A<23->A
+If K=22:Then:ClrDraw:91.1->W:End
+If K=21:Then
+(A-1)/6->A
+{1,.737562149,8.85074576738,141.611932278->L1
+L1^^-1->L2
+L1(A)E
+ClrDraw
+Text(1,35,"TORQUE
+Text(7,1,"|>NM ",round(Ans,C
+Text(13,1,"|>LB FT ",round(AnsL2(2),C
+Text(19,1,"|>LN IN ",round(AnsL2(3),C
+Text(25,1,"|>OZ IN ",round(AnsL2(4),C
+Pause :ClrDraw:91.1->W
+End:End:End
+If W=80:Then
+Text(1,20,"TEMPERATURES
+Text(7,5,"^^oF|>
+Text(13,5,"^^oC|>
+Text(19,5," K|>
+Text(25,5,"^^oR|>
+While W=80
+Text(A,1,">
+getKey->K
+If K:Text(A,1,"   
+A-6((A>7 and K=25)-(A<25 and K=34->A
+If K=22:Then:ClrDraw:91.1->W:End
+If K=21:Then
+(A-1)/6->A
+(A2)-1->A
+{(5/9),459.67,1,273.15,1,0,(5/9),0->L1
+{(9/5),~459.67*(5/9),1,~273.15,1,0,(9/5),0->L2
+L1(A)(E+L1(A+1
+ClrDraw
+Text(1,20,"TEMPERATURES
+Text(7,1,"|>^^oF: ",round(L2(1)(Ans+L2(2)),C
+Text(13,1,"|>^^oC: ",round(L2(3)(Ans+L2(4)),C
+Text(19,1,"|> K:  ",round(Ans,C
+Text(25,1,"|>^^oR: ",round(L2(7)(Ans+L2(8)),C
+Pause :ClrDraw:91.1->W
+End:End:End
+If W=70:Then
+Text(1,30,"PRESSURES
+Text(7,5,"PSI|>
+Text(13,5,"BAR|>
+Text(19,5,"PA|>
+Text(25,5,"AT|>
+Text(31,5,"ATM|>
+Text(37,5,"TORR|>
+While W=70
+Text(A,1,">
+getKey->K
+If K:Text(A,1,"   
+A-6((K=25 and A>7)-(K=34 and A<37->A
+If K=22:Then:ClrDraw:91.1->W:End
+If K=21:Then
+{1,14.503778911491,.0001450378911491,14.2233433343,14.69596432068,.01933679515879->L1
+L1^^-1->L2
+(A-1)/6->A
+L1(A)E
+ClrDraw
+Text(1,30,"PRESSURES
+Text(7,1,"|>PSI ",round(Ans,C
+Text(13,1,"|>BAR ",round(AnsL2(2),C
+Text(19,1,"|>PA ",round(AnsL2(3),C
+Text(25,1,"|>AT ",round(AnsL2(4),C
+Text(31,1,"|>ATM ",round(AnsL2(5),C
+Text(37,1,"|>TORR ",round(AnsL2(6),C
+Pause :ClrDraw:91.1->W
+End:End:End
+If W=60:Then
+Text(1,20,"SPEED/VELOCITY
+Text(7,5,"M/S|>
+Text(13,5,"KPH|>
+Text(19,5,"FT/S|>
+Text(25,5,"MPH|>
+Text(31,5,"KNOT|>
+Text(37,5,"C|>
+While W=60
+Text(A,1,">
+getKey->K
+If K:Text(A,1,"   
+A-6((K=25 and A>7)-(K=34 and A<37->A
+If K=22:Then:ClrDraw:91.1->W:End
+If K=21:Then
+(A-1)/6->A
+{3.280839895013,.9113444152814,1,1.466666666667,1.687809857101,983571056.4304->L1
+L1^^-1->L2
+L1(A)E
+ClrDraw
+Text(1,20,"SPEED/VELOCITY
+Text(7,1,"|>M/S ",round(AnsL2(1),C
+Text(13,1,"|>KPH ",round(AnsL2(2),C
+Text(19,1,"|>FT/S ",round(Ans,C
+Text(25,1,"|>MPH ",round(AnsL2(4),C
+Text(31,1,"|>KNOT ",round(AnsL2(5),C
+Text(37,1,"|>C ",round(AnsL2(6),C
+Pause :ClrDraw:91.1->W
+End:End:End
+If W=50:Then
+Text(1,25,"ENERGY/WORK
+Text(7,5,"J|>
+Text(13,5,"EV|>
+Text(19,5,"KWH|>
+Text(25,5,"BTU|>
+Text(31,5,"KCAL|>
+Text(37,5,"ERG|>
+Text(43,5,"TNT|>
+While W=50
+Text(A,1,">
+getKey->K
+If K:Text(A,1,"   
+A-6((K=25 and A>7)-(K=34 and A<43->A
+If K=22:Then:ClrDraw:91.1->W:End
+If K=21:Then
+(A-1)/6->A
+{1,.0000000000000000001602176462,36000000,1055.056,4186.8,.0000007,4184000000->L1
+L1^^-1->L2
+L1(A)E
+ClrDraw
+Text(1,25,"ENERGY/WORK
+Text(7,1,"|>J ",round(Ans,C
+Text(13,1,"|>EV ",round(AnsL2(2),C
+Text(19,1,"|>KWH ",round(AnsL2(3),C
+Text(25,1,"|>BTU ",round(AnsL2(4),C
+Text(31,1,"|>KCAL ",round(AnsL2(5),C
+Text(37,1,"|>ERG ",round(AnsL2(6),C
+Text(43,1,"|>TNT ",round(AnsL2(7),C
+Pause :ClrDraw:91.1->W
+End:End:End
+If W=40:Then
+Text(1,25,"WEIGHT/MASS
+Text(7,5,"CT|>
+Text(13,5,"G|>
+Text(19,5,"KG|>
+Text(25,5,"OZ|>
+Text(31,5,"LB|>
+Text(37,5,"TON|>
+Text(43,5,"TONNE|>
+Text(49,5,"STONE|>
+Text(55,5,"UK TON|>
+While W=40
+Text(A,1,">
+getKey->K
+If K:Text(A,1,"   
+A-6((K=25 and A>7)-(K=34 and A<55->A
+If K=22:Then:ClrDraw:91.1->W:End
+If K=21:Then
+{.2,1,1000,28.349523125,453.59237,907184.74,1000000,6350.29318,1016406.9088->L1
+L1^^-1->L2
+(A-1)/6->A
+L1(A)E
+ClrDraw
+Text(1,25,"WEIGHT/MASS
+Text(7,1,"|>CT ",round(AnsL2(1),C
+Text(13,1,"|>G ",round(Ans,C
+Text(19,1,"|>KG ",round(AnsL2(3),C
+Text(25,1,"|>OZ ",round(AnsL2(4),C
+Text(31,1,"|>LB ",round(AnsL2(5),C
+Text(37,1,"|>US TON ",round(AnsL2(6),C
+Text(43,1,"|>TONNE ",round(AnsL2(7),C
+Text(49,1,"|>STONE ",round(AnsL2(8),C
+Text(55,1,"|>UK TON ",round(AnsL2(9),C
+Pause :ClrDraw:91.1->W
+End:End:End
+If W=30:Then
+Text(1,30,"VOLUME
+Text(7,5,"LITER|>
+Text(13,5,"CM^^3|>
+Text(19,5,"M^^3|>
+Text(25,5,"GAL|>
+Text(31,5,"IN^^3|>
+Text(37,5,"FT^^3|>
+Text(43,5,"QUART|>
+Text(49,5,"PINT|>
+Text(55,5,"OUNCE|>
+While W=30
+Text(A,1,">
+getKey->K
+If K:Text(A,1,"   
+A-6((K=25 and A>7)-(K=34 and A<55->A
+If K=22:Then:ClrDraw:91.1->W:End
+If K=21:Then
+{1,.001,1000,3.785411784,.016387064,28.316846592,.946352946,.473176473,.0295735295625->L1
+L1^^-1->L2
+(A-1)/6->A
+L1(A)E
+ClrDraw
+Text(1,30,"VOLUME
+Text(7,1,"|>LITER ",round(Ans,C
+Text(13,1,"|>CM^^3 ",round(AnsL2(2),C
+Text(19,1,"|>M^^3 ",round(AnsL2(3),C
+Text(25,1,"|>GAL ",round(AnsL2(4),C
+Text(31,1,"|>IN^^3 ",round(AnsL2(5),C
+Text(37,1,"|>FT^^3 ",round(AnsL2(6),C
+Text(43,1,"|>QUART ",round(AnsL2(7),C
+Text(49,1,"|>PINT ",round(AnsL2(8),C
+Text(55,1,"|>OUNCE ",round(AnsL2(9),C
+Pause :ClrDraw:91.1->W
+End:End:End
+If W=20:Then
+Text(1,35,"AREA
+Text(7,5,"CM^^2|>
+Text(13,5,"FT^^2|>
+Text(19,5,"IN^^2|>
+Text(25,5,"KM^^2|>
+Text(31,5,"M^^2|>
+Text(37,5,"MILE^^2|>
+Text(43,5,"MM^^2|>
+Text(49,5,"YD^^2|>
+While W=20
+getKey->K
+Text(A,1,">
+If K:Text(A,1,"   
+A-6((K=25 and A>7)-(K=34 and A<49->A
+If K=22:Then:ClrDraw:91.1->W:End
+If K=21:Then
+(A-1)/6->A
+{.0001,.09290304,.00064516,100000,1,25789988.110336,.000001,.83612736->L1
+L1^^-1->L2
+L1(A)E
+ClrDraw
+Text(1,35,"AREA
+Text(7,1,"|>CM^^2 ",round(AnsL2(1),C
+Text(13,1,"|>FT^^2 ",round(AnsL2(2),C
+Text(19,1,"|>IN^^2 ",round(AnsL2(3),C
+Text(25,1,"|>KM^^2 ",round(AnsL2(4),C
+Text(31,1,"|>M^^2 ",round(Ans,C
+Text(37,1,"|>MILE^^2 ",round(AnsL2(6),C
+Text(43,1,"|>MM^^2 ",round(AnsL2(7),C
+Text(49,1,"|>YD^^2 ",round(AnsL2(8),C
+Pause :ClrDraw:91.1->W
+End:End:End
+If W=10:Then
+18->W:While W=18
+Text(1,15,"LENGTH/DISTANCE
+If U=1:Then
+Text(7,5,"FT|>
+Text(13,5,"IN|>
+Text(19,5,"YD|>
+Text(25,5,"MI|>
+Text(31,5,"CM|>
+Text(37,5,"M|>
+Text(43,5,"KM|>
+Text(49,5,"NMI|>
+Text(55,5,"LEA|>
+End
+If U=2:Then
+Text(7,5,"FUR|>
+Text(13,5,"FTM|>
+Text(19,5,"LY|>
+Text(25,5,"LM|>
+Text(31,5,"LS|>
+End
+Text(56,75,"NEXT|>
+10->W
+While W=10
+Text(A,1,">
+getKey->K
+If K:Text(A,1,"   
+A-6((K=25 and A>7)-(K=34 and ((A<55 and U=1) or (U=2 and A<31->A
+If K=22:Then:ClrDraw:91.1->W:End
+If K=15:Then:U+(U=1)-(U=2->U:7->A:ClrDraw:18->W:End
+If K=21:Then
+9(U=2)+(A-1)/6->A
+{.3048000000012192,.025400000025908,.9143999986101121,1609.344000614692,.01,1,1000,1852,4828.041700099944,201.16799991496225,1.8288000005647336,9460528409678268,17987547480,299792458->L1
+L1^^-1->L2
+L1(A)E->L
+ClrDraw
+Text(1,15,"LENGTH/DISTANCE
+Text(7,1,"|>FT ",round(AnsL2(1),C
+Text(13,1,"|>IN ",round(AnsL2(2),C
+Text(19,1,"|>YD ",round(AnsL2(3),C
+Text(25,1,"|>MI ",round(AnsL2(4),C
+Text(31,1,"|>CM ",round(AnsL2(5),C
+Text(37,1,"|>M ",round(Ans,C
+Text(43,1,"|>KM ",round(AnsL2(7),C
+Text(49,1,"|>NMI ",round(AnsL2(8),C
+Text(55,1,"|>LEA ",round(AnsL2(9),C
+Pause 
+ClrDraw
+Text(1,15,"LENGTH/DISTANCE
+Text(7,1,"|>FUR ",round(AnsL2(10),C
+Text(13,1,"|>FTM ",round(AnsL2(11),C
+Text(19,1,"|>LY ",round(AnsL2(12),C
+Text(25,1,"|>LM ",round(AnsL2(13),C
+Text(31,1,"|>LS ",round(AnsL2(14),C
+Pause :ClrDraw:91.1->W
+End:End:End:End
+If W=90:Then
+19->W:While W=19
+Text(1,30,"TIME
+If U=1:Then
+Text(7,5,"NANOS|>
+Text(13,5,"MICROS|>
+Text(19,5,"MILLIS|>
+Text(25,5,"SECOND|>
+Text(31,5,"MINUTE|>
+Text(37,5,"HOUR|>
+Text(43,5,"DAY|>
+Text(49,5,"WEEK|>
+Text(55,5,"FORTNIGHT|>
+End
+If U=2:Then
+Text(7,5,"MONTH|>
+Text(13,5,"YEAR|>
+Text(19,5,"DECADE|>
+Text(25,5,"CENTURY|>
+Text(31,5,"MILLENNIUM|>
+End
+Text(56,75,"NEXT|>
+17->W
+While W=17
+Text(A,1,">
+getKey->K
+If K:Text(A,1,"   
+A-6((K=25 and A>7)-(K=34 and ((A<55 and U=1) or (U=2 and A<31->A
+If K=22:Then:ClrDraw:91.1->W:End
+If K=15:Then:U+(U=1)-(U=2->U:7->A:ClrDraw:19->W:End
+If K=21:Then
+9(U=2)+(A-1)/6->A
+{.00000000000001157407407,.00000000001157407407,.00000001157407407407,.00001157407407407,.0006944444444444,.04166666666667,1,7,14,30.43776580833,365,3650,36500,365000->L1
+L1^^-1->L2
+L1(A)E->L
+ClrDraw
+Text(1,35,"TIME
+Text(7,1,"|>NANOS ",round(L2(1)Ans,C
+Text(13,1,"|>MICROS ",round(L2(2)Ans,C
+Text(19,1,"|>MILLIS ",round(L2(3)Ans,C
+Text(25,1,"|>SECOND ",round(L2(4)Ans,C
+Text(31,1,"|>MINUTE ",round(L2(5)Ans,C
+Text(37,1,"|>HOUR ",round(L2(6)Ans,C
+Text(43,1,"|>DAY ",round(Ans,C
+Text(49,1,"|>WEEK ",round(L2(8)Ans,C
+Text(55,1,"|>FORTNIGHT",round(L2(9)Ans,C
+Pause 
+ClrDraw
+Text(1,35,"TIME
+Text(7,1,"|>MONTH ",round(L2(10)Ans,C
+Text(13,1,"|>YEAR ",round(L2(11)Ans,C
+Text(19,1,"|>DECADE ",round(L2(12)Ans,C
+Text(25,1,"|>CENTURY ",round(L2(13)Ans,C
+Text(31,1,"|>MILLENNIUM",round(L2(14)Ans,C
+Pause :ClrDraw:91.1->W:End
+End:End:End
+End
