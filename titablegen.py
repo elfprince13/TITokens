@@ -5,7 +5,7 @@ import sys
 import re
 nanum = re.compile(r'[^\w@#$&|\\;]',flags=re.UNICODE)
 specchars = re.compile(r'([\\\/\[\]\.\{\}\(\)\^\|\+\*\?\$])')
-vinomagicchars = re.compile(r'([^0-9a-zA-Z_])')
+vimnomagicchars = re.compile(r'([^0-9a-zA-Z_])')
 
 def get_byte(attrib):
 	return int(attrib['byte'][1:],16)
@@ -21,7 +21,7 @@ def regesc(string):
 	return specchars.sub(lambda s:r"\%s"%(s.group(0)),string)
 
 def vimnomagic(string):
-	return vinomagicchars.sub(lambda s:r"\%s"%(s.group(0)),string)
+	return "".join(r"%%U%08x" % ord(c) if len(c.encode('utf-8')) > len(c) else vimnomagicchars.sub(lambda s:r"\%s"%(s.group(0)),c.encode('utf-8').encode('string-escape')) for c in string)
 
 def cleanup_chars(string):
 	trouble = dict(	(i,repr(c.encode('utf-8'))[1:-1])	for i,c in enumerate(string) if ord(c) >= 128 or c == "\\")
@@ -59,7 +59,7 @@ def getET(filename):
 	ET.register_namespace("","http://merthsoft.com/Tokens")  
 	return ET.parse(filename).getroot()
 
-def classify(tokens):
+def classify(tokens,vim=False):
 	types = {'op':[],'num':[],'name':[],'control':[],'statement':[],'sigil':[],'groupers':['(',')','"','{','}','[',']'],'separators':[' ',',',':','\n'],'other':[]}
 	namers = range(0x41,0x5F)+range(0x60,0x64)+[0x73,0xAA] #A-Theta, assorted variable types, Ans and Strings
 	numbers = range(0x30,0x3C) # 0-9,.,E
@@ -72,6 +72,8 @@ def classify(tokens):
 		if not aps:
 			continue
 		us = aps.decode('string-escape').decode('utf-8')
+		if vim:
+			aps = us
 		fc = us[0]
 		lc = us[-1]
 		if fb in sigils:
@@ -101,7 +103,7 @@ def dumpLL(LL):
 def make_VimHighlighter(fname):
 	root = getET(fname)
 	tokens = add_all_tokens(root,[],[],raw_mode=True)
-	tokentypes = classify(tokens)
+	tokentypes = classify(tokens,vim=True)
 	#dumpLL(tokentypes)
 	template = r"""
 " TI-Basic highlighting for VIM
@@ -111,7 +113,7 @@ syn match tibNum %s
 syn match tibName %s
 syn match tibControl %s
 syn match tibStatement %s
-syn match tibString '\v(["])(.{-})(\n|\1)'
+syn match tibString '\v\".{-}(\"|(\r|%%$|\n|\-\>|%%U00002192)@=)'
 
 let b:current_syntax = "tibasic"
 
@@ -127,7 +129,7 @@ hi def link tibString		String
 """
 	return template % (
 					   r"'\v(%s)'" % r"|".join(vimnomagic(s) for s in tokentypes['groupers']),
-					   r"'\v(%s)'" % r"|".join(vimnomagic(s) for s in tokentypes['op']),
+					   r"'\v(%s)'" % r"|".join(vimnomagic(s) for s in reversed(sorted(tokentypes['op']))),
 					   r"'\v(%s)'" % r"|".join(vimnomagic(s) for s in tokentypes['num']),
 					   r"'\v(%s)'" % r"|".join(vimnomagic(s) for s in reversed(sorted(tokentypes['name']))),
 					   r"'\v(%s)'" % r"|".join(vimnomagic(s) for s in tokentypes['control']),
