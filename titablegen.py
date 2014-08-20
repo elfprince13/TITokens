@@ -5,6 +5,7 @@ import sys
 import re
 nanum = re.compile(r'[^\w@#$&|\\;]',flags=re.UNICODE)
 specchars = re.compile(r'([\\\/\[\]\.\{\}\(\)\^\|\+\*\?\$])')
+vinomagicchars = re.compile(r'([^0-9a-zA-Z_])')
 
 def get_byte(attrib):
 	return int(attrib['byte'][1:],16)
@@ -18,6 +19,9 @@ def concatenate_bytes(tokbytes):
 
 def regesc(string):
 	return specchars.sub(lambda s:r"\%s"%(s.group(0)),string)
+
+def vimnomagic(string):
+	return vinomagicchars.sub(lambda s:r"\%s"%(s.group(0)),string)
 
 def cleanup_chars(string):
 	trouble = dict(	(i,repr(c.encode('utf-8'))[1:-1])	for i,c in enumerate(string) if ord(c) >= 128 or c == "\\")
@@ -93,6 +97,42 @@ def dumpLL(LL):
 		print kind
 		for token in tokens:
 			print "\t",token.decode('string-escape').decode('utf-8')
+
+def make_VimHighlighter(fname):
+	root = getET(fname)
+	tokens = add_all_tokens(root,[],[],raw_mode=True)
+	tokentypes = classify(tokens)
+	#dumpLL(tokentypes)
+	template = r"""
+" TI-Basic highlighting for VIM
+syn match tibGroupers %s
+syn match tibOp %s
+syn match tibNum %s
+syn match tibName %s
+syn match tibControl %s
+syn match tibStatement %s
+syn match tibString '\v(["])(.{-})(\n|\1)'
+
+let b:current_syntax = "tibasic"
+
+
+hi def link tibGroupers		Delimiters
+hi def link tibOp			Operator
+hi def link tibNum			Number
+hi def link tibName			Identifier
+hi def link tibControl		Keyword
+hi def link tibStatement	Function
+hi def link tibString		String
+
+"""
+	return template % (
+					   r"'\v(%s)'" % r"|".join(vimnomagic(s) for s in tokentypes['groupers']),
+					   r"'\v(%s)'" % r"|".join(vimnomagic(s) for s in tokentypes['op']),
+					   r"'\v(%s)'" % r"|".join(vimnomagic(s) for s in tokentypes['num']),
+					   r"'\v(%s)'" % r"|".join(vimnomagic(s) for s in reversed(sorted(tokentypes['name']))),
+					   r"'\v(%s)'" % r"|".join(vimnomagic(s) for s in tokentypes['control']),
+					   r"'\v(%s)'" % r"|".join(vimnomagic(s) for s in tokentypes['statement']),
+					   )
 
 def make_LudditeLexer(fname):
 	root = getET(fname)
