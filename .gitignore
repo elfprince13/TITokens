@@ -17,4 +17,14 @@ Komodo/build
 
 *.pyc
 
+*.html
+
+*.data
+
+*.js
+
+*.map
+
+*.c
+
 purebasic

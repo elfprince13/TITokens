@@ -254,7 +254,7 @@ unsigned short yylex(void){
 		ret = multibyte[tokIndex++];
 	}
 	return ret;
-}
+}""" + ("""
 
 int main(int argc,const char * args[])
 {
@@ -319,5 +319,10 @@ int main(int argc,const char * args[])
 	return retval;
 }
 
-"""
+""" if len(sys.argv) == 2 or not sys.argv[2] == "ForWeb" else """
+
+unsigned short tEOF_Val(){
+	return tEOF;
+}
+""")
 	
